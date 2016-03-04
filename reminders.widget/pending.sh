@@ -62,6 +62,19 @@ YEARZERO=$(date -j -f "%Y-%m-%d %H:%M:%S %z" "2001-01-01 0:0:0 $ZONERESET" "+%s"
 DUEDATE="($YEARZERO + zduedate)";
 
 IFS=$'\n';
+lists=( $(sqlite3 $HOME/Library/Calendars/Calendar\ Cache<<EOF
+.echo off
+.headers off
+.nullvalue " "
+.separator "\t"
+    SELECT '"' || ztitle || '"'
+    FROM znode
+    WHERE z_ent=42
+        AND zistaskcontainer=1;
+EOF
+) );
+
+IFS=$'\n';
 reminders=( $(sqlite3 $HOME/Library/Calendars/Calendar\ Cache<<EOF
 .echo off
 .headers on
@@ -74,11 +87,9 @@ reminders=( $(sqlite3 $HOME/Library/Calendars/Calendar\ Cache<<EOF
     FROM $CALTABLE rem LEFT JOIN znode cal ON rem.zcalendar=cal.z_pk
     WHERE rem.z_ent=$REMCODE
         AND zcompleteddate IS NULL
---        AND zduedate IS NOT NULL
     ORDER BY zduedate, zpriority;
 EOF
 ) );
-
 
 # Get field names
 IFS=$'\t';
@@ -100,8 +111,9 @@ do
     # $i-1 because original reminders array includes a header row.
     row_json[$i-1]="{$tmp }";
 done;
+listnames=$( join "," ${lists[@]} )
 tmp=$( join "," ${row_json[@]} );
-json="{ \"reminders\": [ $tmp ] }";
+json="{ \"tasks\": [ $tmp ], \"lists\": [$listnames] }";
 echo $json
 
 
