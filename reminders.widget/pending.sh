@@ -2,35 +2,12 @@
 # Cribbed from http://www.macosxtips.co.uk/geeklets/productivity/ical-reminders/
 
 # Changes from original
-# * Use select to figure out REMCODE
-# * Used a little SQL-fu to figure out tables and codes
+# * Used a little SQL-fu to figure out tables and codes instead of hard coding
+# * Select list names independent of tasks so empty lists can be shown as well
 
-# OSXVER=$(sw_vers -productVersion | cut -d . -f 2)
-# if [ $OSXVER -eq 7 ]; then
-#     CALTABLE=zicselement
-#     REMCODE=24
-#     LOCN=zlocation1
-# elif [ $OSXVER -eq 8 ]; then
-#     CALTABLE=zicselement
-#     REMCODE=24
-#     LOCN=zlocation
-# elif [ $OSXVER -eq 9 ]; then
-#     CALTABLE=zicselement
-#     REMCODE=24
-#     LOCN=zlocation
-# elif [ $OSXVER -eq 10 ]; then
-#     CALTABLE=ZCALENDARITEM
-#     REMCODE=9
-#     LOCN=zlocation
-# elif [ $OSXVER -eq 11 ]; then
-#     CALTABLE=ZCALENDARITEM
-#     REMCODE=6
-#     LOCN=zlocation
-# else
-#     CALTABLE=zcalendaritem
-#     REMCODE=9
-#     LOCN=zlocation
-# fi
+# TODO
+# * Find recurrence indicator
+# * Add Notes
 
 # http://stackoverflow.com/questions/1527049/bash-join-elements-of-an-array
 function join {
@@ -51,6 +28,7 @@ LOCN=$(sqlite3 $HOME/Library/Calendars/Calendar\ Cache \
 
 # Now. Duh.
 NOW=$(date +%s);
+
 # Time Zone Offset
 ZONERESET=$(date +%z | awk \
     '{if (substr($1,1,1)!="+") {printf "+"} else {printf "-"} print substr($1,2,4)}');
@@ -61,6 +39,7 @@ YEARZERO=$(date -j -f "%Y-%m-%d %H:%M:%S %z" "2001-01-01 0:0:0 $ZONERESET" "+%s"
 # Due date in seconds since epoch (I think).
 DUEDATE="($YEARZERO + zduedate)";
 
+# Get all list names
 IFS=$'\n';
 lists=( $(sqlite3 $HOME/Library/Calendars/Calendar\ Cache<<EOF
 .echo off
@@ -74,6 +53,7 @@ lists=( $(sqlite3 $HOME/Library/Calendars/Calendar\ Cache<<EOF
 EOF
 ) );
 
+# Get reminders that aren't completed.
 IFS=$'\n';
 reminders=( $(sqlite3 $HOME/Library/Calendars/Calendar\ Cache<<EOF
 .echo off
