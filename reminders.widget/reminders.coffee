@@ -1,40 +1,19 @@
 # TODO
 # * Parse due date into a more presentable format
 # * Add priority lookup (high, medium, low)
-# * Limit number of tasks displayed
+# * Limit number of tasks displayed per list
 # * Limit lists displayed
 
-
-# Widget Settings
-settings =
-    colors:
-        default: 'rgba(255, 255, 255, .75)'
-        background: 'rgba(255, 255, 255, .1)'
-    shadows:
-        box: '0 0 1.25em rgba(0, 0, 0, .5)'
-        text: '0 0 0.625em rgba(0, 0, 0, .25)'
-    show:
-        noDueDate: true
-        tasksPerList: 0
-        listNames: true # Show names of lists or just show tasks in order due?
-        priority: true
-        notes: false
-    lists:
-        show: [] # Empty means show all not in hide list
-        hide: [] # Empty means hide none
-
-# Set the refresh frequency (milliseconds).
-refreshFrequency: 1000 * 60	#1 minute
-
-# Command
-command: 'reminders.widget/pending.sh'
-
-render: (output) -> """
-	<div class='reminders-wrap'>
-	</div>
-"""
-
 update: (output, domEl) ->
+    # Widget Settings
+    tasksPerList = 5    # Number of tasks to show per list
+    noDueDate =    true # NOT IMPLEMENTED
+    listNames =    true # NOT IMPLEMENTED
+    priority =     true # NOT IMPLEMENTED
+    notes =        false # NOT IMPLEMENTED
+    show =         [] # NOT IMPLEMENTED
+    hide =         [] # NOT IMPLEMENTED
+    # Do not alter below here
     str = '<ul class="lists">'
     listNameTpl = ''
     reminders = JSON.parse(output)
@@ -42,7 +21,9 @@ update: (output, domEl) ->
     if !@content
         @content = $(domEl).find('.reminders-wrap')
     for listName in reminders.lists.sort()
-        n = if listTasks[listName] then listTasks[listName].length else 0
+        n = 0
+        if listTasks[listName]?
+            n = if tasksPerList > 0 and listTasks[listName].length > tasksPerList then tasksPerList else listTasks[listName].length
         if n > 0
             listNameTpl = '<div class="list-info">' +
             '<div class="list-name">' + listName + '</div>' +
@@ -50,20 +31,36 @@ update: (output, domEl) ->
             '</div>'
             str +=  '<li class="list">' +
             listNameTpl + '<ul class="tasks">'
+            i = 0
             for task in listTasks[listName]
-                str += '<li class="task">' + task.title
-                if task.dueDate != " "
-                    str += '<br />Due: ' + task.dueDate
-                str += '<br />Priority: ' + task.priority
-                str += '</li>'
+                if i < n
+                    task = listTasks[listName][i]
+                    str += '<li class="task">' + task.title
+                    if task.dueDate != " "
+                        str += '<br />Due: ' + task.dueDate
+                    str += '<br />Priority: ' + task.priority
+                    str += '</li>'
+                    i++
+                else
+                    break
             str += '</ul></li>'
     str += '</ul>'
     @content.html(str)
+
+# Set the refresh frequency (milliseconds).
+refreshFrequency: 1000 * 60	#1 minute
+
+# Command
+command: 'reminders.widget/pending.sh'
 
 showError: (err) ->
 	if @content
 		@content.html '<div class="error">' + err + '</div>'
 
+render: (output) -> """
+	<div class='reminders-wrap'>
+	</div>
+"""
 
 style: """
     top: 190px
@@ -73,18 +70,6 @@ style: """
     font-family: Arial
     font-size: 10pt
     width: 360px
-
-    .reminders-wrapx
-        position: relative
-        height: 100%
-        padding: 1rem
-        border-radius: 1rem
-        background: #{ @settings.colors.background }
-        box-shadow: #{ @settings.shadows.box }
-        text-shadow: #{ @settings.shadows.text }
-        overflow: hidden
-        -webkit-backdrop-filter: blur(10px)
-        vertical-align: middle
 
     .lists,.tasks
         margin: 0
