@@ -29,12 +29,15 @@ LOCN=$(sqlite3 $HOME/Library/Calendars/Calendar\ Cache \
 # Now. Duh.
 NOW=$(date +%s);
 
-# Time Zone Offset
+# Time Zone Offset (i.e. +0500)
 ZONERESET=$(date +%z | awk \
     '{if (substr($1,1,1)!="+") {printf "+"} else {printf "-"} print substr($1,2,4)}');
 
-# Reminders year sero in seconds since epoch (I think).
+# Reminders year sero in seconds since epoch (I think). (i.e. 978289200)
 YEARZERO=$(date -j -f "%Y-%m-%d %H:%M:%S %z" "2001-01-01 0:0:0 $ZONERESET" "+%s");
+
+# Used to figure out which ones are overdue
+NOW=$(date "+%s")
 
 # Due date in seconds since epoch (I think).
 DUEDATE="($YEARZERO + zduedate)";
@@ -63,11 +66,13 @@ reminders=( $(sqlite3 $HOME/Library/Calendars/Calendar\ Cache<<EOF
     SELECT strftime('%Y-%m-%d %H:%M:%S',$DUEDATE,'unixepoch') as dueDate,
         zpriority AS priority,
         rem.ztitle AS title,
-        cal.ztitle AS list
+        cal.ztitle AS list,
+        rem.znotes AS notes,
+        $DUEDATE - $NOW AS secondsLeft
     FROM $CALTABLE rem LEFT JOIN znode cal ON rem.zcalendar=cal.z_pk
     WHERE rem.z_ent=$REMCODE
         AND zcompleteddate IS NULL
-    ORDER BY zduedate, zpriority;
+    ORDER BY CASE WHEN zduedate IS NULL THEN 1 ELSE 0 END, zduedate, zpriority;
 EOF
 ) );
 

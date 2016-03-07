@@ -1,18 +1,11 @@
 # TODO
 # * Parse due date into a more presentable format
-# * Add priority lookup (high, medium, low)
-# * Limit number of tasks displayed per list
 # * Limit lists displayed
-
+# * Clean up code
 update: (output, domEl) ->
     # Widget Settings
-    tasksPerList = 5    # Number of tasks to show per list
-    noDueDate =    true # NOT IMPLEMENTED
-    listNames =    true # NOT IMPLEMENTED
-    priority =     true # NOT IMPLEMENTED
-    notes =        false # NOT IMPLEMENTED
-    show =         [] # NOT IMPLEMENTED
-    hide =         [] # NOT IMPLEMENTED
+    tasksPerList = 5    # Number of tasks to show per list, 0 for all
+    showNotes = false   # Whether notes get shown
     # Do not alter below here
     str = '<ul class="lists">'
     listNameTpl = ''
@@ -26,19 +19,28 @@ update: (output, domEl) ->
             n = if tasksPerList > 0 and listTasks[listName].length > tasksPerList then tasksPerList else listTasks[listName].length
         if n > 0
             listNameTpl = '<div class="list-info">' +
-            '<div class="list-name">' + listName + '</div>' +
-            '<div class="tasks-length">' + n + '</div>' +
-            '</div>'
+                '<div class="list-name">' + listName + '</div>' +
+                '<div class="tasks-length">' + n + '</div>' +
+                '</div>'
             str +=  '<li class="list">' +
             listNameTpl + '<ul class="tasks">'
             i = 0
             for task in listTasks[listName]
+                priority =  switch(task.priority)
+                    when "1" then '!!!'
+                    when "5" then '!!'
+                    when "9" then '!'
+                    else ''
                 if i < n
                     task = listTasks[listName][i]
-                    str += '<li class="task">' + task.title
+                    notes = if showNotes and task.notes then task.notes else ''
+                    str += '<li class="task">' +
+                        '<mark class="priority">' + priority + '</mark> ' + task.title
                     if task.dueDate != " "
-                        str += '<br />Due: ' + task.dueDate
-                    str += '<br />Priority: ' + task.priority
+                        divcls = if task.secondsLeft < 0 then 'overdue' else 'due'
+                        str += '<div class="' + divcls + '">Due @ ' + task.dueDate + '</div>'
+                    if showNotes and task.notes
+                        str += '<div class="notes">' + task.notes + '</div>'
                     str += '</li>'
                     i++
                 else
@@ -53,6 +55,15 @@ refreshFrequency: 1000 * 60	#1 minute
 # Command
 command: 'reminders.widget/pending.sh'
 
+tasksByList: (output) ->
+    reminders = JSON.parse(output)
+    listTasks = {}
+    for t in reminders.tasks
+        listTasks[t.list] = [] if !listTasks[t.list]
+        listTasks[t.list].push(t)
+    return listTasks
+
+# Most of the following was cribbed from
 showError: (err) ->
 	if @content
 		@content.html '<div class="error">' + err + '</div>'
@@ -70,6 +81,8 @@ style: """
     font-family: Arial
     font-size: 10pt
     width: 360px
+    -webkit-backdrop-filter: blur(10px)
+
 
     .lists,.tasks
         margin: 0
@@ -87,7 +100,6 @@ style: """
         padding: 5px 10px
         margin: 0 40px 0 0
         overflow: hidden
-        text-overflow: ellipsis
         position: relative
         white-space: nowrap
         opacity: 0.85
@@ -102,9 +114,6 @@ style: """
     .task
         margin: 0 10px
         padding: 5px 0 5px 20px
-        white-space: nowrap
-        overflow: hidden
-        text-overflow: ellipsis
         position: relative
         opacity: 0.85
 
@@ -113,20 +122,28 @@ style: """
         position: absolute
         width: 10px
         height: 10px
-        background: rgba(0,0,0,0.3)
+        background: rgba(0,0,0,0.2)
         -webkit-border-radius: 20px
-        left: 0
+        border-style: solid
+        border-color: rgba(190, 133, 42, 1);
+        left: 0px
         top: 8px
+
+    .due
+        text-decoration: underline
+
+    .overdue
+        text-decoration: underline
+        color: red
+
+    .notes
+        font-style: oblique
+
+    mark
+        color: red
+        background-color: transparent
 
     .error
         padding: 5px
         background: rgba(0,0,0,0.3)
 """
-
-tasksByList: (output) ->
-    reminders = JSON.parse(output)
-    listTasks = {}
-    for t in reminders.tasks
-        listTasks[t.list] = [] if !listTasks[t.list]
-        listTasks[t.list].push(t)
-    return listTasks
