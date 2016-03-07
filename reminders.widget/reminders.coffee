@@ -1,5 +1,4 @@
 # TODO
-# * Parse due date into a more presentable format
 # * Limit lists displayed
 # * Clean up code
 update: (output, domEl) ->
