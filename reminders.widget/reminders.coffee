@@ -19,7 +19,7 @@ update: (output, domEl) ->
         if n > 0
             listNameTpl = '<div class="list-info">' +
                 '<div class="list-name">' + listName + '</div>' +
-                '<div class="tasks-length">' + n + '</div>' +
+                '<div class="tasks-length">' + n + ' of ' + listTasks[listName].length + '</div>' +
                 '</div>'
             str +=  '<li class="list">' +
             listNameTpl + '<ul class="tasks">'
@@ -36,8 +36,10 @@ update: (output, domEl) ->
                     str += '<li class="task">' +
                         '<mark class="priority">' + priority + '</mark> ' + task.title
                     if task.dueDate != " "
-                        divcls = if task.secondsLeft < 0 then 'overdue' else 'due'
-                        str += '<div class="' + divcls + '">Due @ ' + task.dueDate + '</div>'
+                        now = new Date()
+                        d = new Date(task.dueDate)
+                        divcls = if d < now then 'overdue' else 'due'
+                        str += '<div class="' + divcls + '">Due ' + d.toLocaleString() + '</div>'
                     if showNotes and task.notes
                         str += '<div class="notes">' + task.notes + '</div>'
                     str += '</li>'

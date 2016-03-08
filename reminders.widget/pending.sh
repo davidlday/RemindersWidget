@@ -57,13 +57,14 @@ EOF
 ) );
 
 # Get reminders that aren't completed.
+#    SELECT strftime('%Y-%m-%d %H:%M:%S',$DUEDATE,'unixepoch') as dueDate,
 IFS=$'\n';
 reminders=( $(sqlite3 $HOME/Library/Calendars/Calendar\ Cache<<EOF
 .echo off
 .headers on
 .nullvalue " "
 .separator "\t"
-    SELECT strftime('%Y-%m-%d %H:%M:%S',$DUEDATE,'unixepoch') as dueDate,
+    SELECT strftime('%Y-%m-%dT%H:%M:%S',$DUEDATE,'unixepoch') as dueDate,
         zpriority AS priority,
         rem.ztitle AS title,
         cal.ztitle AS list,
