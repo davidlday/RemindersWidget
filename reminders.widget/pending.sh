@@ -34,7 +34,9 @@ ZONERESET=$(date +%z | awk \
     '{if (substr($1,1,1)!="+") {printf "+"} else {printf "-"} print substr($1,2,4)}');
 
 # Reminders year sero in seconds since epoch (I think). (i.e. 978289200)
-YEARZERO=$(date -j -f "%Y-%m-%d %H:%M:%S %z" "2001-01-01 0:0:0 $ZONERESET" "+%s");
+# Adding timezone caused issues b/c JavaScript Date() uses the system to adjust.
+#YEARZERO=$(date -j -f "%Y-%m-%d %H:%M:%S %z" "2001-01-01 0:0:0 $ZONERESET" "+%s");
+YEARZERO=$(date -j -f "%Y-%m-%d %H:%M:%S %z" "2001-01-01 0:0:0 +0000" "+%s");
 
 # Used to figure out which ones are overdue
 NOW=$(date "+%s")
@@ -102,26 +104,3 @@ tmp=$( join "," ${row_json[@]} );
 json="{ \"tasks\": [ $tmp ], \"lists\": [$listnames] }";
 echo $json
 
-
-# sqlite3 $HOME/Library/Calendars/Calendar\ Cache \
-#     "SELECT  strftime('%w|%m|%d|%Y',$DUEDATE,'unixepoch'), zpriority, rem.ztitle, cal.ztitle \
-# FROM $JOIN WHERE $DATEMATCHES ORDER BY zduedate, zpriority
-# " | awk '
-# function monthname(i) {
-# return substr("JanFebMarAprMayJunJulAugSepOctNovDec",((i-1)*3)+1,3)
-# }
-# function dayname(i) {
-# return substr("SunMonTueWedThuFriSat",(i*3)+1,3)
-# }
-# function priority(i) {
-# 	p[0]="None"; p[1]="High"; p[5]="Medium"; p[9]="Low"; return p[i]
-# }
-# BEGIN {FS="\|"; nMonth=0; nDay=0}
-# {
-# if ((nMonth!=$2)||(nDay!=$3)) {nMonth=$2;nDay=$3;
-# 	print dayname($1), monthname($2), $3, $4
-# };
-# printf "    • " $6
-# if ($5!=0) {printf " [" priority($5) "]"}
-# printf "\n"
-# }'
