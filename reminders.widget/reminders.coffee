@@ -75,7 +75,7 @@ render: (output) -> """
 """
 
 style: """
-    top: 190px
+    top: 10px
     left: 10px
     color: #fff
     background: rgba(0,0,0,0.2)
