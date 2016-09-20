@@ -9,6 +9,7 @@ The following configuration items are available at the top of reminders.coffee:
 
 * tasksPerList: Number of tasks to show per list, 0 for all. 0 by default.
 * showNotes: Whether notes get shown. False by default.
+* showLists: Which lists to show. Leave empty for all. Empty by default.
 
 ## Screenshot
 

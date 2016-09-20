@@ -5,6 +5,7 @@ update: (output, domEl) ->
     # Widget Settings
     tasksPerList = 5    # Number of tasks to show per list, 0 for all
     showNotes = false   # Whether notes get shown
+    showLists = [] #show all by default
     # Do not alter below here
     str = '<ul class="lists">'
     listNameTpl = ''
@@ -13,40 +14,41 @@ update: (output, domEl) ->
     if !@content
         @content = $(domEl).find('.reminders-wrap')
     for listName in reminders.lists.sort()
-        n = 0
-        if listTasks[listName]?
-            n = if tasksPerList > 0 and listTasks[listName].length > tasksPerList then tasksPerList else listTasks[listName].length
-        if n > 0
-            listNameTpl = '<div class="list-info">' +
-                '<div class="list-name">' + listName + '</div>' +
-                '<div class="tasks-length">' + n + ' of ' + listTasks[listName].length + '</div>' +
-                '</div>'
-            str +=  '<li class="list">' +
-            listNameTpl + '<ul class="tasks">'
-            i = 0
-            for task in listTasks[listName]
-                priority =  switch(task.priority)
-                    when "1" then '!!!'
-                    when "5" then '!!'
-                    when "9" then '!'
-                    else ''
-                if i < n
-                    task = listTasks[listName][i]
-                    notes = if showNotes and task.notes then task.notes else ''
-                    str += '<li class="task">' +
-                        '<mark class="priority">' + priority + '</mark> ' + task.title
-                    if task.dueDate != " "
-                        now = new Date()
-                        d = new Date(task.dueDate)
-                        divcls = if d < now then 'overdue' else 'due'
-                        str += '<div class="' + divcls + '">Due ' + d.toLocaleString() + '</div>'
-                    if showNotes and task.notes
-                        str += '<div class="notes">' + task.notes + '</div>'
-                    str += '</li>'
-                    i++
-                else
-                    break
-            str += '</ul></li>'
+        if !showLists or (showLists and listName in showLists)
+            n = 0
+            if listTasks[listName]?
+                n = if tasksPerList > 0 and listTasks[listName].length > tasksPerList then tasksPerList else listTasks[listName].length
+            if n > 0
+                listNameTpl = '<div class="list-info">' +
+                    '<div class="list-name">' + listName + '</div>' +
+                    '<div class="tasks-length">' + n + ' of ' + listTasks[listName].length + '</div>' +
+                    '</div>'
+                str +=  '<li class="list">' +
+                listNameTpl + '<ul class="tasks">'
+                i = 0
+                for task in listTasks[listName]
+                    priority =  switch(task.priority)
+                        when "1" then '!!!'
+                        when "5" then '!!'
+                        when "9" then '!'
+                        else ''
+                    if i < n
+                        task = listTasks[listName][i]
+                        notes = if showNotes and task.notes then task.notes else ''
+                        str += '<li class="task">' +
+                            '<mark class="priority">' + priority + '</mark> ' + task.title
+                        if task.dueDate != " "
+                            now = new Date()
+                            d = new Date(task.dueDate)
+                            divcls = if d < now then 'overdue' else 'due'
+                            str += '<div class="' + divcls + '">Due ' + d.toLocaleString() + '</div>'
+                        if showNotes and task.notes
+                            str += '<div class="notes">' + task.notes + '</div>'
+                        str += '</li>'
+                        i++
+                    else
+                        break
+                str += '</ul></li>'
     str += '</ul>'
     @content.html(str)
 
