@@ -1,8 +1,8 @@
 # RemindersWidget
 
 An [Übersicht](http://tracesof.net/uebersicht/) widget to display your pending
-Reminders tasks in sidebar on the desktop. Uses natural language to help you
-stay organised with due dates.
+Reminders tasks in sidebar on the desktop. 
+Uses natural language to help you stay organised with due dates as well.
 
 ## Configuration
 
