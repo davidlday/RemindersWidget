@@ -2,7 +2,7 @@ update: (output, domEl) ->
     # Widget Settings
     tasksPerList = 0    # Number of tasks to show per list, 0 for all
     showNotes = true   # Whether notes get shown. Either true or false
-    listsToNotShow = ["Future", "Habits", "Shopping List", "House"] # Or leave empty as [] to show all
+    listsToNotShow = [] # Or leave empty as [] to show all
     monthBeforeDay = false # For American's and such. Either true or false
  
     # Do not alter below here
