@@ -14,16 +14,19 @@ function join {
     local IFS="$1"; shift; echo "$*";
 }
 
+# Calendar Cache DB
+CAL_CACHE_DB="file:$HOME/Library/Calendars/Calendar Cache?mode=ro"
+
 # Figure out calendar table
-CALTABLE=$(sqlite3 $HOME/Library/Calendars/Calendar\ Cache \
+CALTABLE=$(sqlite3 "$CAL_CACHE_DB" \
     "SELECT name FROM sqlite_master WHERE name IN ('ZICSELEMENT','ZCALENDARITEM')");
 
 # Get REMCODE for Tasks
-REMCODE=$(sqlite3 $HOME/Library/Calendars/Calendar\ Cache \
+REMCODE=$(sqlite3 "$CAL_CACHE_DB" \
     "SELECT z_ent FROM z_primarykey WHERE z_name = 'Task'");
 
 # Location Table (not sure why this is here)
-LOCN=$(sqlite3 $HOME/Library/Calendars/Calendar\ Cache \
+LOCN=$(sqlite3 "$CAL_CACHE_DB" \
     ".tables ZLOCATION%");
 
 # Now. Duh.
@@ -46,7 +49,7 @@ DUEDATE="($YEARZERO + zduedate)";
 
 # Get all list names
 IFS=$'\n';
-lists=( $(sqlite3 $HOME/Library/Calendars/Calendar\ Cache<<EOF
+lists=( $(sqlite3 "$CAL_CACHE_DB"<<EOF
 .echo off
 .headers off
 .nullvalue " "
@@ -61,7 +64,7 @@ EOF
 # Get reminders that aren't completed.
 #    SELECT strftime('%Y-%m-%d %H:%M:%S',$DUEDATE,'unixepoch') as dueDate,
 IFS=$'\n';
-reminders=( $(sqlite3 $HOME/Library/Calendars/Calendar\ Cache<<EOF
+reminders=( $(sqlite3 "$CAL_CACHE_DB"<<EOF
 .echo off
 .headers on
 .nullvalue " "
