@@ -5,7 +5,7 @@ update: (output, domEl) ->
     # Widget Settings
     tasksPerList = 5    # Number of tasks to show per list, 0 for all
     showNotes = false   # Whether notes get shown
-    showLists = [] #show all by default
+    showLists = ['Six Things'] #show all by default
     # Do not alter below here
     str = '<ul class="lists">'
     listNameTpl = ''
