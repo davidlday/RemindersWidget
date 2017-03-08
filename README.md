@@ -1,7 +1,7 @@
 # RemindersWidget
 
 An [Übersicht](http://tracesof.net/uebersicht/) widget to display your pending
-Reminders tasks in a sidebar on the desktop. 
+Reminders tasks in a sidebar on the desktop.
 
 Uses natural language to help you stay organised with due dates as well.
 
@@ -10,6 +10,8 @@ Uses natural language to help you stay organised with due dates as well.
 When configuring, be sure to use [Sublime Text Editor](https://www.sublimetext.com/3) or similar.
 
 The following configuration items are available at the top of reminders.coffee:
+
+* style: Uses @import for external CSS styles to permit multiple skins with minimal configuration changes in the main script.
 
 * tasksPerList: Number of tasks to show per list, 0 for all. 0 by default.
 * showNotes: Whether notes get shown. True by default.

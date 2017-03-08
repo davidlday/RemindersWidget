@@ -1,16 +1,18 @@
+# Externalize styles for more flexibility
+# Current options are:
+# - reminders.widget/styles/default.css (original style)
+# - reminders.widget/styles/sidebar.css (sidebar style)
+style: """
+    @import url(reminders.widget/styles/default.css);
+"""
+
 update: (output, domEl) ->
     # Widget Settings
-<<<<<<< HEAD
-    tasksPerList = 5    # Number of tasks to show per list, 0 for all
-    showNotes = false   # Whether notes get shown
-    showLists = ['Six Things'] #show all by default
-=======
     tasksPerList = 0    # Number of tasks to show per list, 0 for all
     showNotes = true   # Whether notes get shown. Either true or false
     listsToNotShow = [] # Or leave empty as [] to show all
     monthBeforeDay = false # For American's and such. Either true or false
- 
->>>>>>> pr/4
+
     # Do not alter below here
     str = '<ul class="lists">'
     listNameTpl = ''
@@ -136,83 +138,6 @@ showError: (err) ->
 render: (output) -> """
 	<div class='reminders-wrap'>
 	</div>
-"""
-
-style: """
-    top: 0%
-    left: 0%
-    color: #fff
-    background: rgba(0,0,0,0.6)
-    font-family: Arial
-    font-size: 10pt
-    width: 260px
-    height: 100%
-    /*-webkit-backdrop-filter: blur(10px) brightness(100%) contrast(50%) saturate(100%)*/
-
-
-    .lists,.tasks
-        margin: 0
-        padding: 0
-
-    .list,.task
-        list-style: none
-        padding-top: 6%
-
-    .list-info
-        background: rgba(0,0,0,0.5)
-        position: relative
-        font-weight: bold
-
-    .list-name
-        padding: 5px 10px
-        margin: 0 40px 0 0
-        overflow: hidden
-        position: relative
-        white-space: nowrap
-        opacity: 0.85
-
-    .tasks-length
-        position: absolute
-        top: 0px
-        right: 5px
-        opacity: 100%
-        padding: 5px 5px
-
-    .task
-        margin: 0 10px
-        padding: 5px 0 5px 20px
-        position: relative
-        opacity: 0.85
-
-    .task::after
-        content: ""
-        position: absolute
-        width: 10px
-        height: 10px
-        background: rgba(0,0,0,0.2)
-        -webkit-border-radius: 20px
-        border-style: solid
-        border-color: rgba(190, 133, 42, 1);
-        left: 0px
-        top: 4px
-
-    .due
-        text-decoration: underline
-
-    .overdue
-        text-decoration: underline
-        color: red
-
-    .notes
-        font-style: oblique
-
-    mark
-        color: red
-        background-color: transparent
-
-    .error
-        padding: 5px
-        background: rgba(0,0,0,0.3)
 """
 
 afterRender: (domEl)->
