@@ -25,9 +25,9 @@ CALTABLE=$(sqlite3 "$CAL_CACHE_DB" \
 REMCODE=$(sqlite3 "$CAL_CACHE_DB" \
     "SELECT z_ent FROM z_primarykey WHERE z_name = 'Task'");
 
-# Location Table (not sure why this is here)
-LOCN=$(sqlite3 "$CAL_CACHE_DB" \
-    ".tables ZLOCATION%");
+# Get CALDAVCALENDAR
+CALDAVCALENDAR=$(sqlite3 "$CAL_CACHE_DB" \
+    "SELECT z_ent FROM z_primarykey WHERE z_name = 'CalDAVCalendar'");
 
 # Now. Duh.
 NOW=$(date +%s);
@@ -56,7 +56,7 @@ lists=( $(sqlite3 "$CAL_CACHE_DB"<<EOF
 .separator "\t"
     SELECT '"' || ztitle || '"'
     FROM znode
-    WHERE z_ent=42
+    WHERE z_ent=$CALDAVCALENDAR
         AND zistaskcontainer=1;
 EOF
 ) );
