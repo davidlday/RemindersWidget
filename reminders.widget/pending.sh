@@ -36,7 +36,7 @@ NOW=$(date +%s);
 ZONERESET=$(date +%z | awk \
     '{if (substr($1,1,1)!="+") {printf "+"} else {printf "-"} print substr($1,2,4)}');
 
-# Reminders year sero in seconds since epoch (I think). (i.e. 978289200)
+# Reminders year zero in seconds since epoch (I think). (i.e. 978289200)
 # Adding timezone caused issues b/c JavaScript Date() uses the system to adjust.
 #YEARZERO=$(date -j -f "%Y-%m-%d %H:%M:%S %z" "2001-01-01 0:0:0 $ZONERESET" "+%s");
 YEARZERO=$(date -j -f "%Y-%m-%d %H:%M:%S %z" "2001-01-01 0:0:0 +0000" "+%s");
