@@ -25,9 +25,9 @@ CALTABLE=$(sqlite3 "$CAL_CACHE_DB" \
 REMCODE=$(sqlite3 "$CAL_CACHE_DB" \
     "SELECT z_ent FROM z_primarykey WHERE z_name = 'Task'");
 
-# Location Table (not sure why this is here)
-LOCN=$(sqlite3 "$CAL_CACHE_DB" \
-    ".tables ZLOCATION%");
+# Get CALDAVCALENDAR
+CALDAVCALENDAR=$(sqlite3 "$CAL_CACHE_DB" \
+    "SELECT z_ent FROM z_primarykey WHERE z_name = 'CalDAVCalendar'");
 
 # Now. Duh.
 NOW=$(date +%s);
@@ -36,7 +36,7 @@ NOW=$(date +%s);
 ZONERESET=$(date +%z | awk \
     '{if (substr($1,1,1)!="+") {printf "+"} else {printf "-"} print substr($1,2,4)}');
 
-# Reminders year sero in seconds since epoch (I think). (i.e. 978289200)
+# Reminders year zero in seconds since epoch (I think). (i.e. 978289200)
 # Adding timezone caused issues b/c JavaScript Date() uses the system to adjust.
 #YEARZERO=$(date -j -f "%Y-%m-%d %H:%M:%S %z" "2001-01-01 0:0:0 $ZONERESET" "+%s");
 YEARZERO=$(date -j -f "%Y-%m-%d %H:%M:%S %z" "2001-01-01 0:0:0 +0000" "+%s");
@@ -56,7 +56,7 @@ lists=( $(sqlite3 "$CAL_CACHE_DB"<<EOF
 .separator "\t"
     SELECT '"' || ztitle || '"'
     FROM znode
-    WHERE z_ent=42
+    WHERE z_ent=$CALDAVCALENDAR
         AND zistaskcontainer=1;
 EOF
 ) );
