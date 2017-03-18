@@ -49,7 +49,7 @@ Alternatively, leave it empty to show all lists, as such:
 
 ## Tips For Contributors
 
-* All pull requests go against the develop branch. This project is managed using [https://github.com/nvie/gitflow](gitflow).
+* All pull requests go against the develop branch. This project is managed using [gitflow](https://github.com/nvie/gitflow).
 * Please don't touch reminders.widget.zip. Doing so may cause unnecessary merge conflicts. I will rezip the files during the release process.
 * Same goes for the screenshot. I am considering how to create a gallery of styles where style contributors can add their screenshots.
 * If you're contributing a style, do not use custom.css as the filename.
