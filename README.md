@@ -12,11 +12,16 @@ When configuring, be sure to use [Sublime Text Editor](https://www.sublimetext.c
 The following configuration items are available at the top of reminders.coffee:
 
 * style: Uses @import for external CSS styles to permit multiple skins with minimal configuration changes in the main script.
-
 * tasksPerList: Number of tasks to show per list, 0 for all. 0 by default.
 * showNotes: Whether notes get shown. True by default.
 * listsToNotShow: Which lists to not show. Leave empty for all. Empty by default.
 * monthBeforeDay: Use date format *mm/dd/yyyy* instead of *dd/mm/yyyy*. False by default.
+
+### Customizing styles
+
+[Felix](https://github.com/felixhageloh), creator of Ubersicht, is encouraging users to [submit pull requests for widgets over creating new ones](https://github.com/felixhageloh/uebersicht-widgets#readme)
+
+In support of his direction, I'm taking steps to separate the styling from the code used to pull tasks from Reminders. A new subdirectory was added (./reminders.widget/styles) which contains contributed styles, and which can be tweaked to your heart's content. While you're free to tweak any of the css files in that directory, I suggest you copy the style you want to work with to custom.css and make your changes there. I won't accept any style submissions using that filename.
 
 ### If text looks blurry on your screen
 
@@ -35,6 +40,11 @@ Alternatively, leave it empty to show all lists, as such:
 ## Screenshot
 
 ![Screenshot of the widget](/screenshot.png?raw=true)
+
+## For Contributors
+
+* All pull requests go against the develop branch. This project is managed using [https://github.com/nvie/gitflow](gitflow).
+* If you're contributing a style, do not use custom.css as the filename.
 
 ## Other Stuff
 
