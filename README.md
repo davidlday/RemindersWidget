@@ -23,6 +23,12 @@ The following configuration items are available at the top of reminders.coffee:
 
 In support of his direction, I'm taking steps to separate the styling from the code used to pull tasks from Reminders. A new subdirectory was added (./reminders.widget/styles) which contains contributed styles, and which can be tweaked to your heart's content. While you're free to tweak any of the css files in that directory, I suggest you copy the style you want to work with to custom.css and make your changes there. I won't accept any style submissions using that filename.
 
+At the top of the reminders.coffee script, look for the line:
+
+    @import url(reminders.widget/styles/default.css);
+
+Change "default.css" to whatever style file you want to apply.
+
 ### If text looks blurry on your screen
 
 Find and replace the line `font-size: 10pt` with `font-size: 11pt`. Additionally, change the `11pt` to `12pt` or `13pt` for added readability.
@@ -41,9 +47,11 @@ Alternatively, leave it empty to show all lists, as such:
 
 ![Screenshot of the widget](/screenshot.png?raw=true)
 
-## For Contributors
+## Tips For Contributors
 
 * All pull requests go against the develop branch. This project is managed using [https://github.com/nvie/gitflow](gitflow).
+* Please don't touch reminders.widget.zip. Doing so may cause unnecessary merge conflicts. I will rezip the files during the release process.
+* Same goes for the screenshot. I am considering how to create a gallery of styles where style contributors can add their screenshots.
 * If you're contributing a style, do not use custom.css as the filename.
 
 ## Other Stuff
