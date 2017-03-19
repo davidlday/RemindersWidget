@@ -1,19 +1,33 @@
-# Externalize styles for more flexibility
-# Current options are:
-# - reminders.widget/styles/default.css (original style)
-# - reminders.widget/styles/sidebar.css (sidebar style)
+#############################
+# Widget Settings
+# File containing widget style
+# See: reminders.widget/styles/README.md
+styleFilename = 'default.css'
+# Number of tasks to show per list, 0 for all
+tasksPerList = 0
+# Whether notes get shown. Either true or false
+showNotes = true
+# Lists to hide, or leave empty as [] to show all
+listsToNotShow = []
+# For American's and such. Either true or false
+monthBeforeDay = false
+# Set the refresh frequency (milliseconds).
+refreshFrequency: '1m'
+#############################
+
+#############################
+# Do not alter below here.
+#############################
+
+#############################
+# CSS styling for the widget
 style: """
-    @import url(reminders.widget/styles/default.css);
+    @import url(reminders.widget/styles/""" + styleFilename + """);
 """
 
+#############################
+# Widget update behavior
 update: (output, domEl) ->
-    # Widget Settings
-    tasksPerList = 0    # Number of tasks to show per list, 0 for all
-    showNotes = true   # Whether notes get shown. Either true or false
-    listsToNotShow = [] # Or leave empty as [] to show all
-    monthBeforeDay = false # For American's and such. Either true or false
-
-    # Do not alter below here
     str = '<ul class="lists">'
     listNameTpl = ''
     reminders = JSON.parse(output)
@@ -116,12 +130,14 @@ update: (output, domEl) ->
     str += '</ul>'
     @content.html(str)
 
-# Set the refresh frequency (milliseconds).
-refreshFrequency: '1m'
-
+#############################
 # Command
 command: 'reminders.widget/pending.sh'
 
+#############################
+# Transforms kludgy JSON from pending.sh
+# into something more reasonable.
+# TODO: Fix the shell script
 tasksByList: (output) ->
     reminders = JSON.parse(output)
     listTasks = {}
@@ -130,15 +146,20 @@ tasksByList: (output) ->
         listTasks[t.list].push(t)
     return listTasks
 
-# Most of the following was cribbed from
+#############################
+# Shows errors if they occur
 showError: (err) ->
 	if @content
 		@content.html '<div class="error">' + err + '</div>'
 
+#############################
+# Wrapper div
 render: (output) -> """
 	<div class='reminders-wrap'>
 	</div>
 """
 
+#############################
+# Launch Reminders on click
 afterRender: (domEl)->
   $(domEl).on 'click', => @run "open /Applications/Reminders.app"
