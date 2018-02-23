@@ -1,18 +1,21 @@
 #############################
 # Widget Settings
-# File containing widget style
-# See: reminders.widget/styles/README.md
-styleFilename = 'default.css'
+settings =
+# File containing widget style:
+# - default.css (original)
+# - sidebar.css (sidebar)
+# See: reminders.widget/STYLES.md
+  styleFilename: 'default.css'
 # Number of tasks to show per list, 0 for all
-tasksPerList = 0
+  tasksPerList: 0
 # Whether notes get shown. Either true or false
-showNotes = true
+  showNotes: true
 # Lists to hide, or leave empty as [] to show all
-listsToNotShow = []
+  listsToNotShow: []
 # For American's and such. Either true or false
-monthBeforeDay = false
+  monthBeforeDay: false
 # Set the refresh frequency (milliseconds).
-refreshFrequency: '1m'
+  refreshFrequency: '1m'
 #############################
 
 #############################
@@ -22,8 +25,12 @@ refreshFrequency: '1m'
 #############################
 # CSS styling for the widget
 style: """
-    @import url(reminders.widget/styles/""" + styleFilename + """);
+    @import url(reminders.widget/styles/""" + settings.styleFilename + """);
 """
+
+#############################
+# Widget refresh frequency
+refreshFrequency: settings.refreshFrequency
 
 #############################
 # Widget update behavior
@@ -36,17 +43,17 @@ update: (output, domEl) ->
     if !@content
         @content = $(domEl).find('.reminders-wrap').html(str)
     for listName in reminders.lists.sort().reverse() # For each list
-    		if listName not in listsToNotShow
+    		if listName not in settings.listsToNotShow
                 n = 0
                 if listTasks[listName]? # if tasks exist
-                    n = if tasksPerList > 0 and listTasks[listName].length > tasksPerList then tasksPerList else listTasks[listName].length
+                    n = if settings.tasksPerList > 0 and listTasks[listName].length > settings.tasksPerList then settings.tasksPerList else listTasks[listName].length
                 if n > 0 # if there are tasks in the list
                     # Add list name to title, and number of tasks shown if not all are being shown
-                    if tasksPerList <= 0
+                    if settings.tasksPerList <= 0
                         listNameTpl = '<div class="list-info">' +
                         '<div class="list-name">' + listName + '</div>' +
                         '</div>'
-                    else if tasksPerList > 0
+                    else if settings.tasksPerList > 0
                         listNameTpl = '<div class="list-info">' +
                         '<div class="list-name">' + listName + '</div>' +
                         '<div class="tasks-length">' + n + ' of ' + listTasks[listName].length + '</div>' +
@@ -62,7 +69,7 @@ update: (output, domEl) ->
                             else ''
                         if i < n
                             task = listTasks[listName][i]
-                            notes = if showNotes and task.notes then task.notes else ''
+                            notes = if settings.showNotes and task.notes then task.notes else ''
                             str += '<li class="task">' +
                                 '<mark class="priority">' + priority + '</mark> ' + task.title
                             if task.dueDate != " "
@@ -87,7 +94,7 @@ update: (output, domEl) ->
                                     minutes = '0'+minutes # Append leading zero
 
                                 timeStr = hours + ':' + minutes + ' ' + ampm;
-                                if monthBeforeDay
+                                if settings.monthBeforeDay
                                     dateStr = (d.getMonth() + 1) + '/' + d.getDate()
                                 else
                                     dateStr = d.getDate() + '/' + (d.getMonth() + 1)
@@ -120,7 +127,7 @@ update: (output, domEl) ->
 
                                 divcls = if d < now then 'overdue' else 'due'
                                 str += '<div class="' + divcls + '">Due ' + dStr + '</div>'
-                            if showNotes and task.notes
+                            if settings.showNotes and task.notes
                                 str += '<div class="notes">' + task.notes + '</div>'
                             str += '</li>'
                             i++
