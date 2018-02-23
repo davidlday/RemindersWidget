@@ -66,4 +66,4 @@ cobbled together. Here are all the things I looked at in order to get this worki
 
 UI elements cribbed from both the OmniFocus Task Widget and the Wunderlist Tasks Widget.
 
-Sidebar design, listsToNotShow functionality, and natural langauge additions added by Jordi Kitto.
+Sidebar design, listsToNotShow functionality, and natural langauge additions added by [Jordi Kitto](https://github.com/jordikitto).
