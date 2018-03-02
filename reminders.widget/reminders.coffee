@@ -1,19 +1,40 @@
-# Externalize styles for more flexibility
-# Current options are:
-# - reminders.widget/styles/default.css (original style)
-# - reminders.widget/styles/sidebar.css (sidebar style)
+#############################
+# Widget Settings
+settings =
+# File containing widget style:
+# - default.css (original)
+# - sidebar.css (sidebar)
+# See: reminders.widget/STYLES.md
+  styleFilename: 'default.css'
+# Number of tasks to show per list, 0 for all
+  tasksPerList: 0
+# Whether notes get shown. Either true or false
+  showNotes: true
+# Lists to hide, or leave empty as [] to show all
+  listsToNotShow: []
+# For American's and such. Either true or false
+  monthBeforeDay: false
+# Set the refresh frequency (milliseconds).
+  refreshFrequency: '1m'
+#############################
+
+#############################
+# Do not alter below here.
+#############################
+
+#############################
+# CSS styling for the widget
 style: """
-    @import url(reminders.widget/styles/default.css);
+    @import url(reminders.widget/styles/""" + settings.styleFilename + """);
 """
 
-update: (output, domEl) ->
-    # Widget Settings
-    tasksPerList = 0    # Number of tasks to show per list, 0 for all
-    showNotes = true   # Whether notes get shown. Either true or false
-    listsToNotShow = [] # Or leave empty as [] to show all
-    monthBeforeDay = false # For American's and such. Either true or false
+#############################
+# Widget refresh frequency
+refreshFrequency: settings.refreshFrequency
 
-    # Do not alter below here
+#############################
+# Widget update behavior
+update: (output, domEl) ->
     str = '<ul class="lists">'
     listNameTpl = ''
     reminders = JSON.parse(output)
@@ -22,17 +43,17 @@ update: (output, domEl) ->
     if !@content
         @content = $(domEl).find('.reminders-wrap').html(str)
     for listName in reminders.lists.sort().reverse() # For each list
-    		if listName not in listsToNotShow
+    		if listName not in settings.listsToNotShow
                 n = 0
                 if listTasks[listName]? # if tasks exist
-                    n = if tasksPerList > 0 and listTasks[listName].length > tasksPerList then tasksPerList else listTasks[listName].length
+                    n = if settings.tasksPerList > 0 and listTasks[listName].length > settings.tasksPerList then settings.tasksPerList else listTasks[listName].length
                 if n > 0 # if there are tasks in the list
                     # Add list name to title, and number of tasks shown if not all are being shown
-                    if tasksPerList <= 0
+                    if settings.tasksPerList <= 0
                         listNameTpl = '<div class="list-info">' +
                         '<div class="list-name">' + listName + '</div>' +
                         '</div>'
-                    else if tasksPerList > 0
+                    else if settings.tasksPerList > 0
                         listNameTpl = '<div class="list-info">' +
                         '<div class="list-name">' + listName + '</div>' +
                         '<div class="tasks-length">' + n + ' of ' + listTasks[listName].length + '</div>' +
@@ -48,7 +69,7 @@ update: (output, domEl) ->
                             else ''
                         if i < n
                             task = listTasks[listName][i]
-                            notes = if showNotes and task.notes then task.notes else ''
+                            notes = if settings.showNotes and task.notes then task.notes else ''
                             str += '<li class="task">' +
                                 '<mark class="priority">' + priority + '</mark> ' + task.title
                             if task.dueDate != " "
@@ -73,7 +94,7 @@ update: (output, domEl) ->
                                     minutes = '0'+minutes # Append leading zero
 
                                 timeStr = hours + ':' + minutes + ' ' + ampm;
-                                if monthBeforeDay
+                                if settings.monthBeforeDay
                                     dateStr = (d.getMonth() + 1) + '/' + d.getDate()
                                 else
                                     dateStr = d.getDate() + '/' + (d.getMonth() + 1)
@@ -106,7 +127,7 @@ update: (output, domEl) ->
 
                                 divcls = if d < now then 'overdue' else 'due'
                                 str += '<div class="' + divcls + '">Due ' + dStr + '</div>'
-                            if showNotes and task.notes
+                            if settings.showNotes and task.notes
                                 str += '<div class="notes">' + task.notes + '</div>'
                             str += '</li>'
                             i++
@@ -116,12 +137,14 @@ update: (output, domEl) ->
     str += '</ul>'
     @content.html(str)
 
-# Set the refresh frequency (milliseconds).
-refreshFrequency: '1m'
-
+#############################
 # Command
 command: 'reminders.widget/pending.sh'
 
+#############################
+# Transforms kludgy JSON from pending.sh
+# into something more reasonable.
+# TODO: Fix the shell script
 tasksByList: (output) ->
     reminders = JSON.parse(output)
     listTasks = {}
@@ -130,15 +153,20 @@ tasksByList: (output) ->
         listTasks[t.list].push(t)
     return listTasks
 
-# Most of the following was cribbed from
+#############################
+# Shows errors if they occur
 showError: (err) ->
 	if @content
 		@content.html '<div class="error">' + err + '</div>'
 
+#############################
+# Wrapper div
 render: (output) -> """
 	<div class='reminders-wrap'>
 	</div>
 """
 
+#############################
+# Launch Reminders on click
 afterRender: (domEl)->
   $(domEl).on 'click', => @run "open /Applications/Reminders.app"

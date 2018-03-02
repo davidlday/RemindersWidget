@@ -49,12 +49,16 @@ Alternatively, leave it empty to show all lists, as such:
 
 ## Tips For Contributors
 
-* All pull requests go against the develop branch. This project is managed using [gitflow](https://github.com/nvie/gitflow).
-* Please don't touch reminders.widget.zip. Doing so may cause unnecessary merge conflicts. I will rezip the files during the release process.
-* Same goes for the screenshot. I am considering how to create a gallery of styles where style contributors can add their screenshots.
+* All pull requests go against the master branch. This project is managed using [GitHub Flow](https://guides.github.com/introduction/flow/).
+* Please don't update the screenshot. If enough enough styles are contributed, I'll figure out how to create a gallery.
 * If you're contributing a style, do not use custom.css as the filename.
 
-## Other Stuff
+## Contributors
+
+* [David L. Day](https://github.com/davidlday): Original widget author
+* [Jordi Kitto](https://github.com/jordikitto): Sidebar design, listsToNotShow functionality, and natural langauge additions
+
+## Credits
 
 I pretty much cobbled this together by looking at a bunch of stuff other people
 cobbled together. Here are all the things I looked at in order to get this working.
@@ -63,7 +67,3 @@ cobbled together. Here are all the things I looked at in order to get this worki
 * [Übersicht AnyDo.widget](http://tracesof.net/uebersicht-widgets/#anydo)
 * [Übersicht OmniFocus Task Widget](http://tracesof.net/uebersicht-widgets/#omnifocus-widget)
 * [Übersicht Wunderlist Tasks Widget](http://tracesof.net/uebersicht-widgets/#wunderlist-tasks)
-
-UI elements cribbed from both the OmniFocus Task Widget and the Wunderlist Tasks Widget.
-
-Sidebar design, listsToNotShow functionality, and natural langauge additions added by Jordi Kitto.
