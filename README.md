@@ -55,8 +55,8 @@ Alternatively, leave it empty to show all lists, as such:
 
 ## Contributors
 
-* [David L. Day](@davidlday): Original widget author
-* [Jordi Kitto](@jordikitto): Sidebar design, listsToNotShow functionality, and natural langauge additions
+* [David L. Day](https://github.com/davidlday): Original widget author
+* [Jordi Kitto](https://github.com/jordikitto): Sidebar design, listsToNotShow functionality, and natural langauge additions
 
 ## Credits
 
