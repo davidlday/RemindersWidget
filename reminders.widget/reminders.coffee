@@ -1,11 +1,10 @@
 #############################
 # Widget Settings
 settings =
-# File containing widget style:
-# - default.css (original)
-# - sidebar.css (sidebar)
-# See: reminders.widget/STYLES.md
-  styleFilename: 'default.css'
+# Widget theme:
+# - default (original)
+# - sidebar (sidebar)
+  theme: 'default'
 # Number of tasks to show per list, 0 for all
   tasksPerList: 0
 # Whether notes get shown. Either true or false
@@ -15,7 +14,7 @@ settings =
 # For American's and such. Either true or false
   monthBeforeDay: false
 # Set the refresh frequency (milliseconds).
-  refreshFrequency: '1m'
+  refreshFrequency: '60s'
 #############################
 
 #############################
@@ -24,9 +23,8 @@ settings =
 
 #############################
 # CSS styling for the widget
-style: """
-    @import url(reminders.widget/styles/""" + settings.styleFilename + """);
-"""
+setStyle: (err, output) ->
+  settings.style = output
 
 #############################
 # Widget refresh frequency
@@ -40,8 +38,12 @@ update: (output, domEl) ->
     reminders = JSON.parse(output)
     listTasks = @tasksByList(output)
 
+    # Set the widget's style
+    @run("cat reminders.widget/styles/" + settings.theme + ".css", @setStyle)
+    $(domEl).parent().children("style").html(settings.style)
+
     if !@content
-        @content = $(domEl).find('.reminders-wrap').html(str)
+        @content = $(domEl).children('#reminders-wrap').html(str)
     for listName in reminders.lists.sort().reverse() # For each list
     		if listName not in settings.listsToNotShow
                 n = 0
@@ -161,8 +163,8 @@ showError: (err) ->
 
 #############################
 # Wrapper div
-render: (output) -> """
-	<div class='reminders-wrap'>
+render: (_) -> """
+	<div id='reminders-wrap'>
 	</div>
 """
 
@@ -170,3 +172,8 @@ render: (output) -> """
 # Launch Reminders on click
 afterRender: (domEl)->
   $(domEl).on 'click', => @run "open /Applications/Reminders.app"
+
+#############################
+# CSS styling for the widget
+# style: null
+

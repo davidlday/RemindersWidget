@@ -57,6 +57,7 @@
     height: 10px;
     background: rgba(0,0,0,0.2);
     -webkit-border-radius: 20px;
+    border-radius: 20px;
     border-style: solid;
     border-color: rgba(190, 133, 42, 1);
     left: 0px;
