@@ -1,0 +1,7 @@
+# MacOS Stuff
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Force ignore custom theme
+reminders.widget/styles/custom.css
