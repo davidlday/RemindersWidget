@@ -14,20 +14,34 @@ function join {
     local IFS="$1"; shift; echo "$*";
 }
 
+# Catalina
+# File is in $HOME/Library/Reminders/Container_v1/Stores/
+# Mine is: Data-DB8E17A5-EEC6-44DF-8A5C-96B66F3E1E32.sqlite
+
+
 # Calendar Cache DB
 CAL_CACHE_DB="file:$HOME/Library/Calendars/Calendar Cache?mode=ro"
 
 # Figure out calendar table
 CALTABLE=$(sqlite3 "$CAL_CACHE_DB" \
     "SELECT name FROM sqlite_master WHERE name IN ('ZICSELEMENT','ZCALENDARITEM')");
+# ZCALENDARITEM
 
 # Get REMCODE for Tasks
+
+# Catalina
+# SELECT *
+# FROM Z_PRIMARYKEY
+# WHERE Z_NAME = 'REMCDReminder';
+# returns 21 on my machine
+
 REMCODE=$(sqlite3 "$CAL_CACHE_DB" \
     "SELECT z_ent FROM z_primarykey WHERE z_name = 'Task'");
+# 6
 
 # Get CALDAVCALENDAR
-CALDAVCALENDAR=$(sqlite3 "$CAL_CACHE_DB" \
-    "SELECT z_ent FROM z_primarykey WHERE z_name = 'CalDAVCalendar'");
+# CALDAVCALENDAR=$(sqlite3 "$CAL_CACHE_DB" \
+#     "SELECT z_ent FROM z_primarykey WHERE z_name = 'CalDAVCalendar'");
 
 # Now. Duh.
 NOW=$(date +%s);
@@ -48,6 +62,12 @@ NOW=$(date "+%s")
 DUEDATE="($YEARZERO + zduedate)";
 
 # Get all list names
+
+# Catalina
+# SELECT Z_PK, ZNAME1
+# FROM ZREMCDOBJECT
+# WHERE Z_ENT = '21';
+
 IFS=$'\n';
 lists=( $(sqlite3 "$CAL_CACHE_DB"<<EOF
 .echo off
@@ -56,13 +76,19 @@ lists=( $(sqlite3 "$CAL_CACHE_DB"<<EOF
 .separator "\t"
     SELECT '"' || ztitle || '"'
     FROM znode
-    WHERE z_ent=$CALDAVCALENDAR
-        AND zistaskcontainer=1;
+    WHERE zistaskcontainer=1;
 EOF
 ) );
 
 # Get reminders that aren't completed.
 #    SELECT strftime('%Y-%m-%d %H:%M:%S',$DUEDATE,'unixepoch') as dueDate,
+
+# Catalina
+# SELECT Z_PK, Z_ENT, ZTITLE1, ZCOMPLETED, ZDUEDATE
+# FROM ZREMCDOBJECT
+# WHERE ZLIST = 1404
+# AND ZCOMPLETED = 0;
+
 IFS=$'\n';
 reminders=( $(sqlite3 "$CAL_CACHE_DB"<<EOF
 .echo off
@@ -84,26 +110,26 @@ EOF
 
 # Get field names
 IFS=$'\t';
-fields=( ${reminders[0]} );
+fields=( "${reminders[0]}" );
 
 # Construct JSON
 json=""
 row_json=()
 for (( i=1; i<${#reminders[@]}; i++ ))
 do
-    values=( ${reminders[$i]} );
+    values=( "${reminders[$i]}" );
     value_json=()
     for (( j=0; j<${#fields[@]}; j++ ))
     do
         esc_value=$( echo ${values[$j]} | sed -e 's/"/\\"/g' )
         value_json[$j]=" \"${fields[$j]}\":  \"$esc_value\"";
     done;
-    tmp=$( join "," ${value_json[@]} );
+    tmp=$( join "," "${value_json[@]}" );
     # $i-1 because original reminders array includes a header row.
     row_json[$i-1]="{$tmp }";
 done;
-listnames=$( join "," ${lists[@]} )
-tmp=$( join "," ${row_json[@]} );
+listnames=$( join "," "${lists[@]}" )
+tmp=$( join "," "${row_json[@]}" );
 json="{ \"tasks\": [ $tmp ], \"lists\": [$listnames] }";
 echo $json
 
