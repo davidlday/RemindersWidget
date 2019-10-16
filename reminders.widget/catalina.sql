@@ -1,7 +1,7 @@
 -- Get the Z_ENT for Lists
 SELECT Z_ENT
 FROM Z_PRIMARYKEY
-WHERE Z_NAME = 'REMCDReminder';
+WHERE Z_NAME = 'REMCDList';
 -- Returns 21 on my machine
 
 -- Get a list of Lists
