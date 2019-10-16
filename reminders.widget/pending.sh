@@ -1,13 +1,6 @@
 #!/bin/bash
-# Cribbed from http://www.macosxtips.co.uk/geeklets/productivity/ical-reminders/
-
-# Changes from original
-# * Used a little SQL-fu to figure out tables and codes instead of hard coding
-# * Select list names independent of tasks so empty lists can be shown as well
-
-# TODO
-# * Find recurrence indicator
-# * Add Notes
+# Original cribbed from http://www.macosxtips.co.uk/geeklets/productivity/ical-reminders/
+# Updated for Catalina
 
 # http://stackoverflow.com/questions/1527049/bash-join-elements-of-an-array
 function join {
@@ -16,36 +9,16 @@ function join {
 
 # Catalina
 # File is in $HOME/Library/Reminders/Container_v1/Stores/
-# Mine is: Data-DB8E17A5-EEC6-44DF-8A5C-96B66F3E1E32.sqlite
 # Find the last updated *.sqlite file:
+# https://stackoverflow.com/a/9052878/204032
 REMINDERS_SQLITE=$(find "$HOME/Library/Reminders/Container_v1/Stores" -name "*.sqlite" -type f -print0 | xargs -0 stat -f "%m %N" | sort -rn | head -1 | cut -f2- -d" ")
 
-# Calendar Cache DB
-# CAL_CACHE_DB="file:$HOME/Library/Calendars/Calendar Cache?mode=ro"
-CAL_CACHE_DB="file:$REMINDERS_SQLITE?mode=ro"
-
-# Figure out calendar table
-# CALTABLE=$(sqlite3 "$CAL_CACHE_DB" \
-#     "SELECT name FROM sqlite_master WHERE name IN ('ZICSELEMENT','ZCALENDARITEM')");
-# ZCALENDARITEM
-
-# Get REMCODE for Tasks
+# Reminders Database
+REMINDERS_DB="file:$REMINDERS_SQLITE?mode=ro"
 
 # Catalina - get Z_ENT for Lists
-# SELECT Z_ENT
-# FROM Z_PRIMARYKEY
-# WHERE Z_NAME = 'REMCDList';
-# returns 21 on my machine
-
-Z_ENT_LISTS=$(sqlite3 "$CAL_CACHE_DB" \
+Z_ENT_LISTS=$(sqlite3 "$REMINDERS_DB" \
     "SELECT Z_ENT FROM Z_PRIMARYKEY WHERE Z_NAME = 'REMCDList';");
-# REMCODE=$(sqlite3 "$CAL_CACHE_DB" \
-#     "SELECT z_ent FROM z_primarykey WHERE z_name = 'Task'");
-# 6
-
-# Get CALDAVCALENDAR
-# CALDAVCALENDAR=$(sqlite3 "$CAL_CACHE_DB" \
-#     "SELECT z_ent FROM z_primarykey WHERE z_name = 'CalDAVCalendar'");
 
 # Now. Duh.
 NOW=$(date +%s);
@@ -56,21 +29,14 @@ NOW=$(date +%s);
 
 # Reminders year zero in seconds since epoch (I think). (i.e. 978289200)
 # Adding timezone caused issues b/c JavaScript Date() uses the system to adjust.
-#YEARZERO=$(date -j -f "%Y-%m-%d %H:%M:%S %z" "2001-01-01 0:0:0 $ZONERESET" "+%s");
 YEARZERO=$(date -j -f "%Y-%m-%d %H:%M:%S %z" "2001-01-01 0:0:0 +0000" "+%s");
 
 # Used to figure out which ones are overdue
 NOW=$(date "+%s")
 
 # Get all list names
-
-# Catalina
-# SELECT Z_PK, ZNAME1
-# FROM ZREMCDOBJECT
-# WHERE Z_ENT = '21';
-
 lists=()
-while IFS='' read -r line; do lists+=("$line"); done < <(sqlite3 "$CAL_CACHE_DB"<<EOF
+while IFS='' read -r line; do lists+=("$line"); done < <(sqlite3 "$REMINDERS_DB"<<EOF
 .echo off
 .headers off
 .nullvalue " "
@@ -81,28 +47,9 @@ while IFS='' read -r line; do lists+=("$line"); done < <(sqlite3 "$CAL_CACHE_DB"
 EOF
 )
 
-# IFS=$'\n';
-# lists=( $(sqlite3 "$CAL_CACHE_DB"<<EOF
-# .echo off
-# .headers off
-# .nullvalue " "
-# .separator "\t"
-#     SELECT '"' || ztitle || '"'
-#     FROM znode
-#     WHERE zistaskcontainer=1;
-# EOF
-# ) );
-
-# Get reminders that aren't completed.
-#    SELECT strftime('%Y-%m-%d %H:%M:%S',$DUEDATE,'unixepoch') as dueDate,
-
-# Catalina
-# SELECT Z_PK, Z_ENT, ZTITLE1, ZCOMPLETED, ZDUEDATE
-# FROM ZREMCDOBJECT
-# WHERE ZLIST = 1404
-# AND ZCOMPLETED = 0;
+# Get all Reminders
 reminders=()
-while IFS='' read -r line; do reminders+=("$line"); done < <(sqlite3 "$CAL_CACHE_DB"<<EOF
+while IFS='' read -r line; do reminders+=("$line"); done < <(sqlite3 "$REMINDERS_DB"<<EOF
 .echo off
 .headers on
 .nullvalue " "
@@ -120,28 +67,7 @@ while IFS='' read -r line; do reminders+=("$line"); done < <(sqlite3 "$CAL_CACHE
 EOF
 )
 
-# IFS=$'\n';
-# reminders=( $(sqlite3 "$CAL_CACHE_DB"<<EOF
-# .echo off
-# .headers on
-# .nullvalue " "
-# .separator "\t"
-#     SELECT strftime('%Y-%m-%dT%H:%M:%S',$DUEDATE,'unixepoch') as dueDate,
-#         zpriority AS priority,
-#         rem.ztitle AS title,
-#         cal.ztitle AS list,
-#         rem.znotes AS notes,
-#         $DUEDATE - $NOW AS secondsLeft
-#     FROM $CALTABLE rem LEFT JOIN znode cal ON rem.zcalendar=cal.z_pk
-#     WHERE rem.z_ent=$REMCODE
-#         AND zcompleteddate IS NULL
-#     ORDER BY CASE WHEN zduedate IS NULL THEN 1 ELSE 0 END, zduedate, zpriority;
-# EOF
-# ) );
-
 # Get field names
-# IFS=$'\t';
-# fields=( "${reminders[0]}" );
 IFS=$'\t' read -r -a fields <<< "${reminders[0]}"
 
 # Construct JSON
