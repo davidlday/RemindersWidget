@@ -77,7 +77,7 @@ while IFS='' read -r line; do lists+=("$line"); done < <(sqlite3 "$CAL_CACHE_DB"
 .separator "\t"
     SELECT '"' || ZNAME1 || '"'
     FROM ZREMCDOBJECT
-    WHERE Z_ENT=1$Z_ENT_LISTS;
+    WHERE Z_ENT=$Z_ENT_LISTS;
 EOF
 )
 
@@ -140,22 +140,22 @@ EOF
 # ) );
 
 # Get field names
-IFS=$'\t';
-# IFS="\t";
-fields=( "${reminders[0]}" );
+# IFS=$'\t';
+# fields=( "${reminders[0]}" );
+IFS=$'\t' read -r -a fields <<< "${reminders[0]}"
 
 # Construct JSON
 json=""
 row_json=()
 for (( i=1; i<${#reminders[@]}; i++ ))
 do
-    # echo "${reminders[$i]}"
-    values=( "${reminders[$i]}" );
+    # values=( "${reminders[$i]}" );
+    IFS=$'\t' read -r -a values <<< "${reminders[$i]}"
     value_json=()
     for (( j=0; j<${#fields[@]}; j++ ))
     do
-        esc_value=$( echo ${values[$j]} | sed -e 's/"/\\"/g' )
-        # esc_value=${values[$j]//\"/\\\"/}
+        # esc_value=$( echo ${values[$j]} | sed -e 's/"/\\"/g' )
+        esc_value=${values[$j]//\"/\\\"/}
         value_json[$j]=" \"${fields[$j]}\":  \"$esc_value\"";
     done;
     tmp=$( join "," "${value_json[@]}" );
