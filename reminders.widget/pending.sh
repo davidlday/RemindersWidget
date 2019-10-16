@@ -17,7 +17,8 @@ function join {
 # Catalina
 # File is in $HOME/Library/Reminders/Container_v1/Stores/
 # Mine is: Data-DB8E17A5-EEC6-44DF-8A5C-96B66F3E1E32.sqlite
-
+# Find the last updated *.sqlite file:
+find "$HOME/Library/Reminders/Container_v1/Stores" -name "*.sqlite" -type f -print0 | xargs -0 stat -f "%m %N" | sort -rn | head -1 | cut -f2- -d" "
 
 # Calendar Cache DB
 CAL_CACHE_DB="file:$HOME/Library/Calendars/Calendar Cache?mode=ro"
