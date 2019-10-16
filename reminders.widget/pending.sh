@@ -25,8 +25,8 @@ REMINDERS_SQLITE=$(find "$HOME/Library/Reminders/Container_v1/Stores" -name "*.s
 CAL_CACHE_DB="file:$REMINDERS_SQLITE?mode=ro"
 
 # Figure out calendar table
-CALTABLE=$(sqlite3 "$CAL_CACHE_DB" \
-    "SELECT name FROM sqlite_master WHERE name IN ('ZICSELEMENT','ZCALENDARITEM')");
+# CALTABLE=$(sqlite3 "$CAL_CACHE_DB" \
+#     "SELECT name FROM sqlite_master WHERE name IN ('ZICSELEMENT','ZCALENDARITEM')");
 # ZCALENDARITEM
 
 # Get REMCODE for Tasks
@@ -37,8 +37,10 @@ CALTABLE=$(sqlite3 "$CAL_CACHE_DB" \
 # WHERE Z_NAME = 'REMCDList';
 # returns 21 on my machine
 
-REMCODE=$(sqlite3 "$CAL_CACHE_DB" \
-    "SELECT z_ent FROM z_primarykey WHERE z_name = 'Task'");
+Z_ENT_LISTS=$(sqlite3 "$CAL_CACHE_DB" \
+    "SELECT Z_ENT FROM Z_PRIMARYKEY WHERE Z_NAME = 'REMCDList';");
+# REMCODE=$(sqlite3 "$CAL_CACHE_DB" \
+#     "SELECT z_ent FROM z_primarykey WHERE z_name = 'Task'");
 # 6
 
 # Get CALDAVCALENDAR
@@ -49,8 +51,8 @@ REMCODE=$(sqlite3 "$CAL_CACHE_DB" \
 NOW=$(date +%s);
 
 # Time Zone Offset (i.e. +0500)
-ZONERESET=$(date +%z | awk \
-    '{if (substr($1,1,1)!="+") {printf "+"} else {printf "-"} print substr($1,2,4)}');
+# ZONERESET=$(date +%z | awk \
+#     '{if (substr($1,1,1)!="+") {printf "+"} else {printf "-"} print substr($1,2,4)}');
 
 # Reminders year zero in seconds since epoch (I think). (i.e. 978289200)
 # Adding timezone caused issues b/c JavaScript Date() uses the system to adjust.
@@ -60,9 +62,6 @@ YEARZERO=$(date -j -f "%Y-%m-%d %H:%M:%S %z" "2001-01-01 0:0:0 +0000" "+%s");
 # Used to figure out which ones are overdue
 NOW=$(date "+%s")
 
-# Due date in seconds since epoch (I think).
-DUEDATE="($YEARZERO + zduedate)";
-
 # Get all list names
 
 # Catalina
@@ -70,17 +69,29 @@ DUEDATE="($YEARZERO + zduedate)";
 # FROM ZREMCDOBJECT
 # WHERE Z_ENT = '21';
 
-IFS=$'\n';
-lists=( $(sqlite3 "$CAL_CACHE_DB"<<EOF
+lists=()
+while IFS='' read -r line; do lists+=("$line"); done < <(sqlite3 "$CAL_CACHE_DB"<<EOF
 .echo off
 .headers off
 .nullvalue " "
 .separator "\t"
-    SELECT '"' || ztitle || '"'
-    FROM znode
-    WHERE zistaskcontainer=1;
+    SELECT '"' || ZNAME1 || '"'
+    FROM ZREMCDOBJECT
+    WHERE Z_ENT=1$Z_ENT_LISTS;
 EOF
-) );
+)
+
+# IFS=$'\n';
+# lists=( $(sqlite3 "$CAL_CACHE_DB"<<EOF
+# .echo off
+# .headers off
+# .nullvalue " "
+# .separator "\t"
+#     SELECT '"' || ztitle || '"'
+#     FROM znode
+#     WHERE zistaskcontainer=1;
+# EOF
+# ) );
 
 # Get reminders that aren't completed.
 #    SELECT strftime('%Y-%m-%d %H:%M:%S',$DUEDATE,'unixepoch') as dueDate,
@@ -90,28 +101,47 @@ EOF
 # FROM ZREMCDOBJECT
 # WHERE ZLIST = 1404
 # AND ZCOMPLETED = 0;
-
-IFS=$'\n';
-reminders=( $(sqlite3 "$CAL_CACHE_DB"<<EOF
+reminders=()
+while IFS='' read -r line; do reminders+=("$line"); done < <(sqlite3 "$CAL_CACHE_DB"<<EOF
 .echo off
 .headers on
 .nullvalue " "
 .separator "\t"
-    SELECT strftime('%Y-%m-%dT%H:%M:%S',$DUEDATE,'unixepoch') as dueDate,
-        zpriority AS priority,
-        rem.ztitle AS title,
-        cal.ztitle AS list,
-        rem.znotes AS notes,
-        $DUEDATE - $NOW AS secondsLeft
-    FROM $CALTABLE rem LEFT JOIN znode cal ON rem.zcalendar=cal.z_pk
-    WHERE rem.z_ent=$REMCODE
-        AND zcompleteddate IS NULL
-    ORDER BY CASE WHEN zduedate IS NULL THEN 1 ELSE 0 END, zduedate, zpriority;
+    SELECT strftime('%Y-%m-%dT%H:%M:%S',($YEARZERO + TASK.ZDUEDATE),'unixepoch') as dueDate,
+        TASK.ZPRIORITY AS priority,
+        TASK.ZTITLE1 AS title,
+        LIST.ZNAME1 AS list,
+        TASK.ZNOTES AS notes,
+        ($YEARZERO + TASK.ZDUEDATE) - $NOW AS secondsLeft
+    FROM ZREMCDOBJECT TASK LEFT JOIN ZREMCDOBJECT LIST on TASK.ZLIST = LIST.Z_PK
+    WHERE LIST.Z_ENT=21
+        AND TASK.ZCOMPLETED = 0
+    ORDER BY CASE WHEN TASK.ZDUEDATE IS NULL THEN 1 ELSE 0 END, TASK.ZDUEDATE, TASK.ZPRIORITY;
 EOF
-) );
+)
+
+# IFS=$'\n';
+# reminders=( $(sqlite3 "$CAL_CACHE_DB"<<EOF
+# .echo off
+# .headers on
+# .nullvalue " "
+# .separator "\t"
+#     SELECT strftime('%Y-%m-%dT%H:%M:%S',$DUEDATE,'unixepoch') as dueDate,
+#         zpriority AS priority,
+#         rem.ztitle AS title,
+#         cal.ztitle AS list,
+#         rem.znotes AS notes,
+#         $DUEDATE - $NOW AS secondsLeft
+#     FROM $CALTABLE rem LEFT JOIN znode cal ON rem.zcalendar=cal.z_pk
+#     WHERE rem.z_ent=$REMCODE
+#         AND zcompleteddate IS NULL
+#     ORDER BY CASE WHEN zduedate IS NULL THEN 1 ELSE 0 END, zduedate, zpriority;
+# EOF
+# ) );
 
 # Get field names
 IFS=$'\t';
+# IFS="\t";
 fields=( "${reminders[0]}" );
 
 # Construct JSON
@@ -119,11 +149,13 @@ json=""
 row_json=()
 for (( i=1; i<${#reminders[@]}; i++ ))
 do
+    # echo "${reminders[$i]}"
     values=( "${reminders[$i]}" );
     value_json=()
     for (( j=0; j<${#fields[@]}; j++ ))
     do
         esc_value=$( echo ${values[$j]} | sed -e 's/"/\\"/g' )
+        # esc_value=${values[$j]//\"/\\\"/}
         value_json[$j]=" \"${fields[$j]}\":  \"$esc_value\"";
     done;
     tmp=$( join "," "${value_json[@]}" );
@@ -133,5 +165,5 @@ done;
 listnames=$( join "," "${lists[@]}" )
 tmp=$( join "," "${row_json[@]}" );
 json="{ \"tasks\": [ $tmp ], \"lists\": [$listnames] }";
-echo $json
+echo "$json"
 
