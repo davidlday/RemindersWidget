@@ -5,6 +5,11 @@ Reminders tasks in a sidebar on the desktop.
 
 Uses natural language to help you stay organised with due dates as well.
 
+**NB:** This release contains updates to use the new Reminders database on
+macOS Catalina and later. If you are still on Mojave or prior, please stick with
+[v1.1.0](https://github.com/davidlday/RemindersWidget/releases/tag/v1.1.0)
+until you can upgrade.
+
 ## Configuration
 
 The following configuration items are available at the top of reminders.coffee:
@@ -12,8 +17,10 @@ The following configuration items are available at the top of reminders.coffee:
 * theme: Name of theme to use.
 * tasksPerList: Number of tasks to show per list, 0 for all. 0 by default.
 * showNotes: Whether notes get shown. True by default.
-* listsToNotShow: Which lists to not show. Leave empty for all. Empty by default.
-* monthBeforeDay: Use date format *mm/dd/yyyy* instead of *dd/mm/yyyy*. False by default.
+* listsToNotShow: Which lists to not show. Leave empty for all. Empty by
+  default.
+* monthBeforeDay: Use date format *mm/dd/yyyy* instead of *dd/mm/yyyy*. False
+  by default.
 * refreshFrequency:
 
 ### Customizing styles
@@ -56,15 +63,19 @@ Alternatively, leave it empty to show all lists, as such:
 
 ## Tips For Contributors
 
-* All pull requests go against the master branch. This project is managed using [GitHub Flow](https://guides.github.com/introduction/flow/).
-* Please don't update the screenshot. If enough enough styles are contributed, I'll figure out how to create a gallery.
-* All contributed styles must be in css due to how I managed to get styles out of the main script.
+* All pull requests go against the master branch. This project is managed using
+  [GitHub Flow](https://guides.github.com/introduction/flow/).
+* Please don't update the screenshot. If enough enough styles are contributed,
+  I'll figure out how to create a gallery.
+* All contributed styles must be in css due to how I managed to get styles out
+  of the main script.
 * If you're contributing a style, do not use custom.css as the filename.
 
 ## Contributors
 
 * [David L. Day](https://github.com/davidlday): Original widget author
-* [Jordi Kitto](https://github.com/jordikitto): Sidebar design, listsToNotShow functionality, and natural langauge additions
+* [Jordi Kitto](https://github.com/jordikitto): Sidebar design, listsToNotShow
+  functionality, and natural langauge additions
 
 ## Credits
 
