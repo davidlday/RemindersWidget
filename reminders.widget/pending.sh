@@ -2,23 +2,44 @@
 # Original cribbed from http://www.macosxtips.co.uk/geeklets/productivity/ical-reminders/
 # Updated for Catalina
 
+# Constants for reuse.
+REMINDERS_STORES="$HOME/Library/Reminders/Container_v1/Stores";
+SQL_GET_Z_ENT="SELECT Z_ENT FROM Z_PRIMARYKEY WHERE Z_NAME = 'REMCDList'";
+
 # http://stackoverflow.com/questions/1527049/bash-join-elements-of-an-array
 function join {
     local IFS="$1"; shift; echo "$*";
 }
 
-# Catalina
-# File is in $HOME/Library/Reminders/Container_v1/Stores/
-# Find the last updated *.sqlite file:
-# https://stackoverflow.com/a/9052878/204032
-REMINDERS_SQLITE=$(find "$HOME/Library/Reminders/Container_v1/Stores" -name "*.sqlite" -type f -print0 | xargs -0 stat -f "%m %N" | sort -rn | head -1 | cut -f2- -d" ")
+# Test to see if it's the correct Reminders datastore.
+# The simplest test seems to be to count the number of rows
+# of REMCDList entities that also have ZCKIDENTIFIER
+function test_db {
+  sqlite3 "$1" \
+    "SELECT COUNT(*) FROM ZREMCDOBJECT WHERE Z_ENT = ($SQL_GET_Z_ENT) AND ZCKIDENTIFIER IS NOT NULL;";
+}
 
-# Reminders Database
-REMINDERS_DB="file:$REMINDERS_SQLITE?mode=ro"
+# Get a list of datastore files and test each one for Reminder lists.
+function find_db {
+  # Exclude "Data-local.sqlite"
+  for DBFILE in "$REMINDERS_STORES"/Data-*-*.sqlite;
+  do
+    DB="file:$DBFILE?mode=ro";
+    COUNT=$(test_db "$DB")
+    if [ "$COUNT" -gt 0 ];
+    then
+      echo "$DB";
+      break;
+    fi
+  done;
+}
+
+# Get the Reminders datastore.
+# Consider caching the name of the file to avoid hitting these each time.
+REMINDERS_DB="$(find_db)"
 
 # Catalina - get Z_ENT for Lists
-Z_ENT_LISTS=$(sqlite3 "$REMINDERS_DB" \
-    "SELECT Z_ENT FROM Z_PRIMARYKEY WHERE Z_NAME = 'REMCDList';");
+Z_ENT_LISTS=$(sqlite3 "$REMINDERS_DB" "$SQL_GET_Z_ENT;");
 
 # Now. Duh.
 NOW=$(date +%s);
