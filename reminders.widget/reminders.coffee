@@ -14,7 +14,7 @@ settings =
 # For American's and such. Either true or false
   monthBeforeDay: false
 # Set the refresh frequency (milliseconds).
-  refreshFrequency: '60s'
+  refreshFrequency: '6000'
 #############################
 
 #############################
@@ -176,4 +176,3 @@ afterRender: (domEl)->
 #############################
 # CSS styling for the widget
 # style: null
-
