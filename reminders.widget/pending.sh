@@ -80,6 +80,7 @@ while IFS='' read -r line; do reminders+=("$line"); done < <(sqlite3 "$REMINDERS
         TASK.ZTITLE1 AS title,
         LIST.ZNAME1 AS list,
         TASK.ZNOTES AS notes,
+        TASK.ZFLAGGED AS flagged,
         ($YEARZERO + TASK.ZDUEDATE) - $NOW AS secondsLeft
     FROM ZREMCDOBJECT TASK LEFT JOIN ZREMCDOBJECT LIST on TASK.ZLIST = LIST.Z_PK
     WHERE LIST.Z_ENT = $Z_ENT_LISTS
