@@ -64,7 +64,8 @@ while IFS='' read -r line; do lists+=("$line"); done < <(sqlite3 "$REMINDERS_DB"
 .separator "\t"
     SELECT '"' || ZNAME1 || '"'
     FROM ZREMCDOBJECT
-    WHERE Z_ENT=$Z_ENT_LISTS;
+    WHERE Z_ENT=$Z_ENT_LISTS
+    AND ZMARKEDFORDELETION = 0;
 EOF
 )
 
@@ -84,6 +85,8 @@ while IFS='' read -r line; do reminders+=("$line"); done < <(sqlite3 "$REMINDERS
     FROM ZREMCDOBJECT TASK LEFT JOIN ZREMCDOBJECT LIST on TASK.ZLIST = LIST.Z_PK
     WHERE LIST.Z_ENT = $Z_ENT_LISTS
         AND TASK.ZCOMPLETED = 0
+        AND LIST.ZMARKEDFORDELETION = 0
+        AND TASK.ZMARKEDFORDELETION = 0
     ORDER BY CASE WHEN TASK.ZDUEDATE IS NULL THEN 1 ELSE 0 END, TASK.ZDUEDATE, TASK.ZPRIORITY;
 EOF
 )
