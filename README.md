@@ -1,3 +1,7 @@
+:warning: I no longer use Übersicht and will no longer maintain this widget. :warning:
+
+If you're interested in taking over this repository, drop me a note.
+
 # RemindersWidget
 
 An [Übersicht](http://tracesof.net/uebersicht/) widget to display your pending
